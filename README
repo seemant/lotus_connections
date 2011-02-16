@@ -1,10 +1,11 @@
-= Lotus Connections
+Lotus Connections
 
-simple ruby wrapper around the lotus connections profile api.
+Simple python wrapper around the lotus connections profile api, based on Rajiv
+Aaron Manglani's simple ruby wrapper code (https://github.com/rajiv/lotus_connections)
 
-== License
+License
 
-Copyright © 2009-2010 Rajiv Aaron Manglani. All rights reserved.
+Copyright © 2011 Seemant Kulleen. All rights reserved.
 
 Released under the MIT license.
 
