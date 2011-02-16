@@ -71,9 +71,9 @@ class LotusConnections( object ):
             raise
 
     def find_by(self, params):
-    """
-    Returns a set of tuples (name, email, phone)
-    """
+        """
+        Returns a set of tuples (name, email, phone)
+        """
 
         uri = BASE_URI + 'search.do' + '?%s' % urlencode(params)
         self.connection.setopt(pycurl.URL, uri)
