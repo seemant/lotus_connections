@@ -25,6 +25,9 @@ class LotusConnections( object ):
         if not all([username, password]):
             raise Exception, "Username and password cannot be blank"
 
+        self.username = username
+        self.password = password
+
         self.tel = re.compile(r'(="tel".*="value">(?P<tel>[\d-]*)</span></div>)')
 
 
@@ -56,7 +59,7 @@ class LotusConnections( object ):
         uri = BASE_URI + 'search.do' + '?%s' % urlencode(params)
  
         passwd_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        passwd_mgr.add_password(None, BASE_URI, username, password)
+        passwd_mgr.add_password(None, BASE_URI, self.username, self.password)
 
         handler = urllib2.HTTPBasicAuthHandler(passwd_mgr)
         opener = urllib2.build_opener(handler)
