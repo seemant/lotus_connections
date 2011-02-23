@@ -13,38 +13,17 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
 """
 
-import pycurl
+import urllib2
 from urllib import urlencode
 import feedparser
 import re
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
-
 BASE_URI = 'https://connections.mmm.com/profiles/atom/'
-
 
 class LotusConnections( object ):
     def __init__( self, username=None, password=None ):
         if not all([username, password]):
             raise Exception, "Username and password cannot be blank"
-
-        self.connection = pycurl.Curl()
-        self.connection.setopt(
-            pycurl.USERPWD,
-            '%s:%s' % (username, password)
-        )
-
-
-        self.connection.setopt(
-            pycurl.HTTPHEADER,
-            [
-                """Connection: keep-alive""",
-                """Accept: application/xml""",
-            ]
-        )
 
         self.tel = re.compile(r'(="tel".*="value">(?P<tel>[\d-]*)</span></div>)')
 
@@ -74,19 +53,25 @@ class LotusConnections( object ):
         """
         Returns a set of tuples (name, email, phone)
         """
-
         uri = BASE_URI + 'search.do' + '?%s' % urlencode(params)
-        self.connection.setopt(pycurl.URL, uri)
+ 
+        passwd_mgr = urllib2.HTTPPasswordMgrWithDefaultRealm()
+        passwd_mgr.add_password(None, BASE_URI, username, password)
 
-        resp = StringIO()
-        self.connection.setopt(pycurl.WRITEFUNCTION, resp.write)
+        handler = urllib2.HTTPBasicAuthHandler(passwd_mgr)
+        opener = urllib2.build_opener(handler)
+        urllib2.install_opener(opener)
+
+        self.connection = urllib2.Request(uri)
+
+        self.connection.add_header('Accept', 'application/xml')
 
         try:
-            self.connection.perform()
-        except pycurl.error:
-            raise
+            resp = urllib2.urlopen(self.connection)
+        except IOError, e:
+                raise
 
-        return self._parse_feed(resp.getvalue())
+        return self._parse_feed(resp.read())
 
     def _parse_feed( self, feed ):
         results = []
