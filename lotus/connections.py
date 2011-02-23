@@ -20,7 +20,7 @@ import re
 
 BASE_URI = 'https://connections.mmm.com/profiles/atom/'
 
-class LotusConnections( object ):
+class lotus_connections( object ):
     def __init__( self, username=None, password=None ):
         if not all([username, password]):
             raise Exception, "Username and password cannot be blank"
