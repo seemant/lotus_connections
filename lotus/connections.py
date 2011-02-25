@@ -54,7 +54,7 @@ class lotus_connections( object ):
 
     def find_by(self, params):
         """
-        Returns a set of tuples (name, email, phone)
+        Returns a set of tuples (name, email, phone, profile link)
         """
         uri = BASE_URI + 'search.do' + '?%s' % urlencode(params)
  
@@ -81,10 +81,18 @@ class lotus_connections( object ):
         for entry in feedparser.parse(feed)['entries']:
             result = [i for i in entry['contributors'][0].itervalues()]
             match = self.tel.search(entry['content'][0]['value'])
+            for link in entry['links']:
+                if link['type'] == 'text/html':
+                    profile = link['href']
             try:
                 result.append(match.groupdict()['tel'])
             except AttributeError:
                 result.append('')
+
+            for link in entry['links']:
+                if link['type'] == 'text/html' and link['rel'] == 'related':
+                    result.append(link['href'])
+
             results.append(tuple(result))
 
         return results
